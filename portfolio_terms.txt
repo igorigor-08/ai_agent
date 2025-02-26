@@ -1,0 +1,166 @@
+### **Loan Portfolio** – _Кредитный портфель_  
+The total outstanding loans issued by a bank, covering both corporate and retail segments. The portfolio is analyzed to assess risk, profitability, and capital requirements.  
+
+### **Corporate Lending** – _Корпоративное кредитование_  
+Loans provided to businesses and corporations, often larger in size and requiring detailed credit analysis.
+
+### **Retail Lending** – _Розничное кредитование_  
+Loans issued to individual consumers, including mortgages, auto loans, and personal loans.
+
+### **Credit Risk** – _Кредитный риск_  
+The risk that a borrower will default on their debt obligations, leading to financial loss for the lender.
+
+### **Default** – _Дефолт_  
+The failure of a borrower to meet debt obligations, typically defined as being **90+ days past due**.
+
+### **Exposure at Default (EAD)** – _Объем экспозиции на момент дефолта (EAD)_  
+The total value a bank is exposed to if a borrower defaults.  
+\[
+EAD = \text{Outstanding Loan Balance} + \text{Undrawn Credit Commitments} \times \text{Credit Conversion Factor (CCF)}
+\]
+
+### **Loss Given Default (LGD)** – _Убыток при дефолте (LGD)_  
+The proportion of total exposure that will be lost if a borrower defaults.  
+\[
+LGD = 1 - \text{Recovery Rate}
+\]
+
+### **Probability of Default (PD)** – _Вероятность дефолта (PD)_  
+The likelihood that a borrower will default within a given time frame, usually **one year**.
+
+### **Expected Loss (EL)** – _Ожидаемый убыток (EL)_  
+The average loss expected due to defaults over a period.  
+\[
+EL = EAD \times PD \times LGD
+\]
+
+### **Unexpected Loss (UL)** – _Неожиданный убыток (UL)_  
+The deviation from expected loss, used for capital calculations.  
+\[
+UL = \sqrt{\text{Variance}(EL)}
+\]
+
+## **Risk Metrics & Capital Requirements**
+### **Risk-Weighted Assets (RWA)** – _Активы, взвешенные по риску (RWA)_  
+Assets adjusted for risk based on regulatory guidelines (Basel).  
+\[
+RWA = \sum (\text{Asset Exposure} \times \text{Risk Weight})
+\]
+
+### **Capital Adequacy Ratio (CAR)** – _Коэффициент достаточности капитала (CAR)_  
+A measure of a bank’s capital against its risk exposure.  
+\[
+CAR = \frac{\text{Tier 1 + Tier 2 Capital}}{RWA}
+\]
+
+### **Basel III** – _Базель III_  
+A global regulatory framework for managing bank capital and liquidity to ensure stability.
+
+### **Internal Ratings-Based Approach (IRB)** – _Подход внутреннего рейтинга (ПВР)_  
+A risk management approach allowing banks to use internal models for capital calculations.
+
+### **Stress Testing** – _Стресс-тестирование_  
+Simulating adverse economic conditions to assess financial stability.
+
+### **Economic Capital** – _Экономический капитал_  
+The capital required to absorb unexpected losses and maintain solvency.
+
+### **Regulatory Capital** – _Регуляторный капитал_  
+The minimum capital banks must hold per regulatory requirements.
+
+### **Expected Credit Loss (ECL)** – _Ожидаемые кредитные убытки (ECL)_  
+The loss calculated under IFRS 9 for provisioning.  
+\[
+ECL = EAD \times PD \times LGD
+\]
+
+### **Collective Provisions** – _Групповые резервы_  
+Reserves set aside for losses on a group of loans with similar risk characteristics.
+
+### **Individual Provisions** – _Индивидуальные резервы_  
+Reserves assigned for specific problem loans.
+
+## **Loan Portfolio Performance Indicators**
+### **Net Interest Margin (NIM)** – _Чистая процентная маржа (NIM)_  
+The difference between interest earned and interest paid, relative to assets.  
+\[
+NIM = \frac{\text{Interest Income} - \text{Interest Expense}}{\text{Average Earning Assets}}
+\]
+
+### **Cost of Risk (CoR)** – _Стоимость риска (CoR)_  
+Loan loss provisions as a percentage of total loans.  
+\[
+CoR = \frac{\text{Loan Loss Provisions}}{\text{Total Loans}}
+\]
+
+### **Non-Performing Loans (NPL)** – _Проблемные кредиты (NPL)_  
+Loans that are **90+ days past due** or unlikely to be repaid.
+
+### **NPL Ratio** – _Доля проблемных кредитов_  
+The proportion of non-performing loans in the total loan portfolio.  
+\[
+NPL \ Ratio = \frac{\text{Non-Performing Loans}}{\text{Total Loans}}
+\]
+
+### **Loan-to-Deposit Ratio (LDR)** – _Коэффициент кредитов к депозитам (LDR)_  
+A measure of liquidity risk.  
+\[
+LDR = \frac{\text{Total Loans}}{\text{Total Deposits}}
+\]
+
+### **Charge-Off Rate** – _Коэффициент списания убытков_  
+The percentage of loans written off as unrecoverable.  
+\[
+\text{Charge-Off Rate} = \frac{\text{Charge-Offs}}{\text{Total Loans}}
+\]
+
+### **Recovery Rate** – _Коэффициент возврата_  
+The percentage of defaulted loans recovered.  
+\[
+\text{Recovery Rate} = \frac{\text{Recovered Amount}}{\text{Defaulted Loan Amount}}
+\]
+
+## **Credit Scoring & Underwriting**
+### **Credit Score** – _Кредитный скоринг_  
+A numerical representation of a borrower’s creditworthiness.
+
+### **Loan-to-Value Ratio (LTV)** – _Коэффициент LTV (кредит к стоимости залога)_  
+The ratio of loan amount to the appraised value of collateral.  
+\[
+LTV = \frac{\text{Loan Amount}}{\text{Collateral Value}}
+\]
+
+### **Debt-to-Income Ratio (DTI)** – _Коэффициент долговой нагрузки (DTI)_  
+A borrower’s total monthly debt payments relative to income.  
+\[
+DTI = \frac{\text{Monthly Debt Payments}}{\text{Gross Monthly Income}}
+\]
+
+### **Debt Service Coverage Ratio (DSCR)** – _Коэффициент покрытия долга (DSCR)_  
+Used in corporate lending to assess ability to repay debt.  
+\[
+DSCR = \frac{\text{Net Operating Income}}{\text{Debt Service}}
+\]
+
+## **Portfolio Risk Analytics & Modeling**
+### **Monte Carlo Simulation** – _Моделирование Монте-Карло_  
+A risk analysis technique that simulates thousands of scenarios to estimate distributions.
+
+### **Credit Migration Analysis** – _Анализ миграции кредитов_  
+Tracking borrower credit rating changes over time.
+
+### **Vintage Analysis** – _Винтаж-анализ_  
+Comparing loan performance by origination period.
+
+### **Transition Matrix** – _Матрица переходов_  
+A table showing probability of credit rating changes.
+
+## **Regulatory & Compliance**
+### **IFRS 9** – _МСФО 9_  
+Accounting standard requiring Expected Credit Loss (ECL) provisioning.
+
+### **CECL (Current Expected Credit Loss)** – _Текущие ожидаемые кредитные убытки (CECL)_  
+A US accounting standard similar to IFRS 9.
+
+### **Risk Appetite Framework** – _Рамки риск-аппетита_  
+Defines acceptable levels of risk a bank is willing to take.
