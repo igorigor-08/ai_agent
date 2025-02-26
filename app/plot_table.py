@@ -10,12 +10,14 @@ class AutoVisualizer:
     def __init__(
         self, 
         df,
+        filepath,
         column_types: dict = None,
         xaxis: str = None, 
         hue: str = None,
         agg_needed: bool = None, 
     ):
         self.df = df
+        self.filepath = filepath
         self.column_types = column_types
         self.xaxis = xaxis
         self.hue = hue
@@ -138,9 +140,6 @@ class AutoVisualizer:
             print('No numeric columns')
             return self.df, None
 
-        fig = None  # Initialize fig
-
-        
         
         # Set a consistent color palette
         sns.set_palette("husl")        
@@ -222,5 +221,5 @@ class AutoVisualizer:
                 plt.yticks(fontsize=12)
                 plt.tight_layout()
                 plt.show()
-        plt.savefig('static/images/res.png')
-        return self.df, fig
+        plt.savefig(self.filepath)
+        return self.df, True

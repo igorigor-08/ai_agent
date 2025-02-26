@@ -12,12 +12,16 @@
         <div id="chat-box">
             {% for message in chat_history %}
                 <p><strong>Вы:</strong> {{ message.user }}</p>
-                {% if message.bot.type == 'image' %}
-                    <p><strong>Бот:</strong></p>
-                    <img src="{{ url_for('uploaded_file', filename=message.bot.content) }}" alt="Изображение от бота" style="max-width: 100%; height: auto;">
-                {% else %}
-                    <p><strong>Бот:</strong> {{ message.bot }}</p>
-                {% endif %}
+                <div class="bot-response">
+                    {% if message.bot.text %}
+                        <p><strong>Бот:</strong> {{ message.bot.text }}</p>
+                    {% endif %}
+                    {% if message.bot.image %}
+                        <img src="{{ url_for('uploaded_file', filename=message.bot.image) }}" 
+                            alt="Изображение от бота" 
+                            style="max-width: 100%; height: auto;">
+                    {% endif %}
+                </div>
             {% endfor %}
         </div>
         <form id="chat-form">
@@ -42,14 +46,21 @@
             .then(data => {
                 const chatBox = document.getElementById('chat-box');
                 chatBox.innerHTML += `<p><strong>Вы:</strong> ${data.user_message}</p>`;
-                if (data.bot_response.type === 'image') {
-                    chatBox.innerHTML += `<p><strong>Бот:</strong></p>`;
-                    chatBox.innerHTML += `<img src="/static/images/${data.bot_response.content}" alt="Изображение от бота" style="max-width: 100%; height: auto;">`;
-                } else {
-                    chatBox.innerHTML += `<p><strong>Бот:</strong> ${data.bot_response}</p>`;
+                
+                let botContent = '<div class="bot-response">';
+                if (data.bot_response.text) {
+                    botContent += `<p><strong>Бот:</strong> ${data.bot_response.text}</p>`;
                 }
-                document.getElementById('user-input').value = ''; // Очищаем поле ввода
-                chatBox.scrollTop = chatBox.scrollHeight; // Прокрутка вниз
+                if (data.bot_response.image) {
+                    botContent += `<img src="/static/images/${data.bot_response.image}" 
+                                    alt="Изображение от бота" 
+                                    style="max-width: 100%; height: auto;">`;
+                }
+                botContent += '</div>';
+                
+                chatBox.innerHTML += botContent;
+                document.getElementById('user-input').value = '';
+                chatBox.scrollTop = chatBox.scrollHeight;
             });
         });
     </script>
