@@ -7,29 +7,59 @@ import time
 from database_utils import safe_query_to_dataframe
 from plot_table import AutoVisualizer
 from gc_utils import get_ans_from_gc
+from langchain.schema import HumanMessage
+from langchain.chat_models.gigachat import GigaChat
+import requests
+from flask_session import Session
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferWindowMemory
 
 app = Flask(__name__)
-app.secret_key = 'asd'
+app.secret_key = 'afd'
+
+giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
+
+giga = GigaChat(credentials=giga_key,
+                model="GigaChat", 
+                timeout=30, 
+                verify_ssl_certs=False)
+giga.verbose = False
+
+memory = ConversationBufferWindowMemory(k=100)
+conversation = ConversationChain(llm=giga, memory=memory)
 
 UPLOAD_FOLDER = 'static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 @app.route('/')
 def index():
-    chat_history = session.get('chat_history', [])
-    return render_template('index.html', chat_history=chat_history)
+    session['chat_history'] = session.get('chat_history', [])
+    return render_template('index.html', chat_history=session['chat_history'])
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
     if 'user_id' not in session:
         session['user_id'] = str(uuid.uuid4())
-    
+
     user_message = request.form['message']
-    
+    with open('../db_structure.txt') as f:
+        database_structure = f.read()
     # Логика формирования ответа
-    answer_json = get_ans_from_gc(user_message)
+    answer_json = get_ans_from_gc(conversation, message_type = "query", query_dict = {"user_prompt":user_message})
+    print(answer_json)
     answer_json = ast.literal_eval(answer_json)
+
     result = safe_query_to_dataframe(answer_json['SQL'])
+    if len(result["errors"]) > 0:
+        answer_json = get_ans_from_gc(conversation, message_type = "error", query_dict = {
+            "sql_query":answer_json['SQL'],
+            "error":" ".join(result["errors"]),
+            "database_structure":database_structure,
+            "user_prompt":user_message,
+        })
+        answer_json = ast.literal_eval(answer_json)
+        result = safe_query_to_dataframe(answer_json['SQL'])
+
     df = result['data']
     
     # Инициализация ответа
@@ -50,8 +80,12 @@ def send_message():
         if fig:
             bot_response['image'] = filename
         else:
-            print(df_new.values[0])
-            bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
+            if df.shape == (1, 1):
+                print(df_new.values[0])
+                bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
+            else:
+                bot_response['text'] += f"\nОтвет: {df_new}"
+
     except Exception as e:
         print(f"Ошибка генерации изображения: {str(e)}")
     

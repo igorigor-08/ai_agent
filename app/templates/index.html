@@ -11,58 +11,123 @@
         <h1>Диалог с ботом</h1>
         <div id="chat-box">
             {% for message in chat_history %}
-                <p><strong>Вы:</strong> {{ message.user }}</p>
-                <div class="bot-response">
-                    {% if message.bot.text %}
-                        <p><strong>Бот:</strong> {{ message.bot.text }}</p>
-                    {% endif %}
-                    {% if message.bot.image %}
-                        <img src="{{ url_for('uploaded_file', filename=message.bot.image) }}" 
-                            alt="Изображение от бота" 
-                            style="max-width: 100%; height: auto;">
-                    {% endif %}
+                <div class="chat-message {% if message.bot %}bot-message{% else %}user-message{% endif %}">
+                    <div class="avatar {% if message.bot %}bot-avatar{% else %}user-avatar{% endif %}">
+                        {% if message.bot %}🤖{% else %}👤{% endif %}
+                    </div>
+                    <div class="message-content">
+                        {% if message.bot %}
+                            <div class="bot-response">
+                                {% if message.bot.text %}
+                                    <p>{{ message.bot.text }}</p>
+                                {% endif %}
+                                {% if message.bot.image %}
+                                    <img src="{{ url_for('uploaded_file', filename=message.bot.image) }}" 
+                                         alt="Визуализация данных">
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <p>{{ message.user }}</p>
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
         </div>
         <form id="chat-form">
             <input type="text" id="user-input" name="message" placeholder="Введите сообщение..." required>
-            <button type="submit">Отправить</button>
+            <button type="submit">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                <span>Отправить</span>
+            </button>
         </form>
     </div>
-
     <script>
-        // JavaScript для отправки сообщений без перезагрузки страницы
         document.getElementById('chat-form').addEventListener('submit', function(event) {
             event.preventDefault();
-            const userInput = document.getElementById('user-input').value;
+            const userInput = document.getElementById('user-input');
+            const message = userInput.value;
+            
             fetch('/send_message', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: `message=${encodeURIComponent(userInput)}`
+                body: `message=${encodeURIComponent(message)}`
             })
             .then(response => response.json())
             .then(data => {
                 const chatBox = document.getElementById('chat-box');
-                chatBox.innerHTML += `<p><strong>Вы:</strong> ${data.user_message}</p>`;
                 
-                let botContent = '<div class="bot-response">';
-                if (data.bot_response.text) {
-                    botContent += `<p><strong>Бот:</strong> ${data.bot_response.text}</p>`;
-                }
-                if (data.bot_response.image) {
-                    botContent += `<img src="/static/images/${data.bot_response.image}" 
-                                    alt="Изображение от бота" 
-                                    style="max-width: 100%; height: auto;">`;
-                }
-                botContent += '</div>';
+                // Добавляем сообщение пользователя
+                addMessage({
+                    isBot: false,
+                    text: data.user_message,
+                    image: null
+                });
                 
-                chatBox.innerHTML += botContent;
-                document.getElementById('user-input').value = '';
+                // Добавляем ответ бота
+                addMessage({
+                    isBot: true,
+                    text: data.bot_response.text,
+                    image: data.bot_response.image
+                });
+                
+                userInput.value = '';
                 chatBox.scrollTop = chatBox.scrollHeight;
             });
         });
-    </script>
+        
+        function addMessage({isBot, text, image}) {
+            const chatBox = document.getElementById('chat-box');
+            
+            // Создаем основной контейнер сообщения
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${isBot ? 'bot-message' : 'user-message'}`;
+            
+            // Создаем аватар
+            const avatar = document.createElement('div');
+            avatar.className = `avatar ${isBot ? 'bot-avatar' : 'user-avatar'}`;
+            avatar.textContent = isBot ? '🤖' : '👤';
+            
+            // Создаем контейнер содержимого
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'message-content';
+            
+            // Добавляем текст если есть
+            if (text) {
+                const textPara = document.createElement('p');
+                textPara.textContent = text;
+                contentDiv.appendChild(textPara);
+            }
+            
+            // Добавляем изображение если есть
+            if (image) {
+                const img = document.createElement('img');
+                img.src = `/static/images/${image}`;
+                img.alt = "Визуализация данных";
+                img.style.maxWidth = '100%';
+                img.style.height = 'auto';
+                img.style.borderRadius = '12px';
+                img.style.marginTop = '10px';
+                img.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+                contentDiv.appendChild(img);
+            }
+            
+            // Собираем элементы вместе
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(contentDiv);
+            
+            // Анимация появления
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(10px)';
+            chatBox.appendChild(messageDiv);
+            
+            // Запускаем анимацию
+            setTimeout(() => {
+                messageDiv.style.opacity = '1';
+                messageDiv.style.transform = 'translateY(0)';
+            }, 50);
+        }
+        </script>
 </body>
 </html>

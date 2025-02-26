@@ -5,25 +5,66 @@
 
 Генерация SQL-запроса:
 2.1 Напишите SQL-запрос к PostgreSQL, который извлекает запрошенные данные из описанной ниже базы данных:
-База данных ипотечных портфелей
-Эта база данных хранит информацию об ипотечных портфелях, включая данные о клиентах, историю платежей и индикаторы дефолтов.
-Таблицы и столбцы:
-Таблица: users
-user_id (SERIAL): Уникальный идентификатор пользователя.
-age (INTEGER): Возраст пользователя.
-income (NUMERIC(10,2)): Доход пользователя.
-activity_score (INTEGER): Оценка активности пользователя.
-Таблица: products
-product_id (SERIAL) Уникальный идентификатор продукта.
-product_type (VARCHAR(50)) Тип продукта (например, "Ипотека", "Кредит", "Депозит").
-Таблица: user_products
-user_id (INTEGER) Уникальный идентификатор пользователя.
-product_id (INTEGER) Уникальный идентификатор продукта.
-Таблица: usage_data
-usage_id (SERIAL) Уникальный идентификатор записи об использовании.
-product_id (INTEGER) Уникальный идентификатор продукта.
-usage_date (DATE) Дата использования продукта.
-amount (NUMERIC(10,2)) Сумма использования продукта.
+# База данных кредитного портфеля
+**Таблицы и столбцы:**
+
+### Таблица: IndividualBorrowers
+- **IndividualID (SERIAL)**: Уникальный идентификатор физического заемщика.
+- **DateOfBirth (DATE)**: Дата рождения заемщика.
+
+### Таблица: CompanyBorrowers
+- **CompanyID (SERIAL)**: Уникальный идентификатор компании-заемщика.
+- **CompanyName (VARCHAR(100))**: Название компании.
+- **BusinessSector (ENUM)**: Сектор бизнеса (`Technology`, `Financial Services`, `Retail`, `Energy and Utilities`, `Industrial and Manufacturing`, `Real Estate`).
+
+### Таблица: CreditProducts
+- **ProductID (SERIAL)**: Уникальный идентификатор кредитного продукта.
+- **ProductName (ENUM)**: Тип продукта (`Personal Loan`, `Mortgage`, `Auto Loan`, `Credit Card`, `Business Loan`, `Revolving Credit Line`, `Warranty`).
+- **InterestRate (NUMERIC(5,2))**: Процентная ставка.
+- **MinLoanAmount (NUMERIC(15,2))**: Минимальная сумма займа.
+- **MaxLoanAmount (NUMERIC(15,2))**: Максимальная сумма займа.
+- **TermMonths (INTEGER)**: Срок займа в месяцах.
+
+### Таблица: Credits
+- **CreditID (SERIAL)**: Уникальный идентификатор кредита.
+- **IndividualID (INTEGER)**: Ссылка на физического заемщика (может быть `NULL`).
+- **CompanyID (INTEGER)**: Ссылка на компанию-заемщика (может быть `NULL`).
+- **ProductID (INTEGER)**: Ссылка на кредитный продукт.
+- **LoanAmount (NUMERIC(15,2))**: Сумма кредита.
+- **InterestRate (NUMERIC(5,2))**: Процентная ставка по кредиту.
+- **StartDate (DATE)**: Дата начала кредита.
+- **EndDate (DATE)**: Планируемая дата погашения (может быть `NULL`).
+- **Status (ENUM)**: Статус кредита (`Active`, `Closed`, `Defaulted`).
+
+### Таблица: ClientTransactions
+- **TransactionID (SERIAL)**: Уникальный идентификатор транзакции.
+- **CreditID (INTEGER)**: Ссылка на кредит.
+- **TransactionType (ENUM)**: Тип транзакции (`Principal repayment`, `Repayment of overdue debt`, `Penalty repayment`).
+- **Amount (NUMERIC(15,2))**: Сумма транзакции.
+- **TransactionDate (TIMESTAMP)**: Дата и время транзакции.
+
+### Таблица: RiskRatings
+- **RatingID (SERIAL)**: Уникальный идентификатор оценки риска.
+- **IndividualID (INTEGER)**: Ссылка на физического заемщика (может быть `NULL`).
+- **CompanyID (INTEGER)**: Ссылка на компанию-заемщика (может быть `NULL`).
+- **CreditID (INTEGER)**: Ссылка на кредит.
+- **Rating (INTEGER)**: Оценка риска (1 — минимальный риск, 26 — максимальный риск).
+- **ProbabilityOfDefault (NUMERIC(5,4))**: Вероятность дефолта (от 0.0000 до 1.0000).
+- **RatingDate (DATE)**: Дата оценки.
+
+### Таблица: Defaults
+- **DefaultID (SERIAL)**: Уникальный идентификатор дефолта.
+- **CreditID (INTEGER)**: Ссылка на кредит.
+- **DefaultDate (DATE)**: Дата наступления дефолта.
+- **DefaultAmount (NUMERIC(15,2))**: Непогашенная сумма на момент дефолта.
+- **RecoveryAmount (NUMERIC(15,2))**: Сумма, восстановленная после дефолта.
+- **ReasonForDefault (ENUM)**: Причина дефолта (`Overdue`, `Bankruptcy`, `Restructuring`, `Liquidation`, `Cession`).
+
+### Таблица: CreditReserves
+- **ReserveID (SERIAL)**: Уникальный идентификатор резерва.
+- **CreditID (INTEGER)**: Ссылка на кредит.
+- **ReserveStage (ENUM)**: Этап резервирования (`Stage 1`, `Stage 2`, `Stage 3`).
+- **ReserveAmount (NUMERIC(15,2))**: Зарезервированная сумма.
 
 2.2 Форматируйте SQL-запрос в виде обычного текста, строго следующим образом:
 Убедитесь, что запрос корректен и извлекает именно те данные, которые запросил пользователь.
