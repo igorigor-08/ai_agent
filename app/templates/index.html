@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Диалог с ботом</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+</head>
+<body>
+    <div class="chat-container">
+        <h1>Диалог с ботом</h1>
+        <div id="chat-box">
+            {% for message in chat_history %}
+                <p><strong>Вы:</strong> {{ message.user }}</p>
+                {% if message.bot.type == 'image' %}
+                    <p><strong>Бот:</strong></p>
+                    <img src="{{ url_for('uploaded_file', filename=message.bot.content) }}" alt="Изображение от бота" style="max-width: 100%; height: auto;">
+                {% else %}
+                    <p><strong>Бот:</strong> {{ message.bot }}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+        <form id="chat-form">
+            <input type="text" id="user-input" name="message" placeholder="Введите сообщение..." required>
+            <button type="submit">Отправить</button>
+        </form>
+    </div>
+
+    <script>
+        // JavaScript для отправки сообщений без перезагрузки страницы
+        document.getElementById('chat-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const userInput = document.getElementById('user-input').value;
+            fetch('/send_message', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `message=${encodeURIComponent(userInput)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                const chatBox = document.getElementById('chat-box');
+                chatBox.innerHTML += `<p><strong>Вы:</strong> ${data.user_message}</p>`;
+                if (data.bot_response.type === 'image') {
+                    chatBox.innerHTML += `<p><strong>Бот:</strong></p>`;
+                    chatBox.innerHTML += `<img src="/static/images/${data.bot_response.content}" alt="Изображение от бота" style="max-width: 100%; height: auto;">`;
+                } else {
+                    chatBox.innerHTML += `<p><strong>Бот:</strong> ${data.bot_response}</p>`;
+                }
+                document.getElementById('user-input').value = ''; // Очищаем поле ввода
+                chatBox.scrollTop = chatBox.scrollHeight; // Прокрутка вниз
+            });
+        });
+    </script>
+</body>
+</html>
