@@ -1,0 +1,3 @@
+user_prompt
+Агент задал уточняющий вопрос пользователю: clarifying_question
+Пользователь доуточнил запрос: clarification
