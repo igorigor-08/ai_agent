@@ -34,60 +34,98 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 @app.route('/')
 def index():
     session['chat_history'] = session.get('chat_history', [])
+    session['flag_user_msg_is_clarification'] = session.get('flag_user_msg_is_clarification', False)
     return render_template('index.html', chat_history=session['chat_history'])
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
+
     if 'user_id' not in session:
         session['user_id'] = str(uuid.uuid4())
 
     user_message = request.form['message']
+    bot_response = {"text": None, "image": None}
+
     with open('../db_structure.txt') as f:
         database_structure = f.read()
+
     # Логика формирования ответа
-    answer_json = get_ans_from_gc(conversation, message_type = "query", query_dict = {"user_prompt":user_message})
-    print(answer_json)
-    answer_json = ast.literal_eval(answer_json)
 
-    result = safe_query_to_dataframe(answer_json['SQL'])
-    if len(result["errors"]) > 0:
-        answer_json = get_ans_from_gc(conversation, message_type = "error", query_dict = {
-            "sql_query":answer_json['SQL'],
-            "error":" ".join(result["errors"]),
-            "database_structure":database_structure,
-            "user_prompt":user_message,
-        })
+    if session['flag_user_msg_is_clarification']:
+
+        initial_answer = get_ans_from_gc(conversation,
+                                         message_type='clarification',
+                                         query_dict={"user_clarification" : user_message,
+                                                     "user_prompt" : session['chat_history'][-2],
+                                                     "gc_first_response" : session['chat_history'][-1]})
+        answer_json = initial_answer # CG is supposed to return SQL query + comment here
         answer_json = ast.literal_eval(answer_json)
-        result = safe_query_to_dataframe(answer_json['SQL'])
+        print(answer_json)
 
-    df = result['data']
-    
-    # Инициализация ответа
-    bot_response = {"text": None, "image": None}
-    filename = None
-    
-    # Текстовый ответ
-    if 'comment' in answer_json:
-        bot_response['text'] = answer_json['comment']
-    
-    # Генерация изображения
-    try:
-        timestamp = int(time.time())
-        filename = f"{session['user_id']}_{timestamp}.png"
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        df_new, fig = AutoVisualizer(df, file_path).visualize()
+    else: # user message is query, not clarification
         
-        if fig:
-            bot_response['image'] = filename
-        else:
-            if df.shape == (1, 1):
-                print(df_new.values[0])
-                bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
-            else:
-                bot_response['text'] += f"\nОтвет: {df_new}"
+        initial_answer = get_ans_from_gc(conversation, message_type='query', query_dict={"user_prompt":user_message})
+        answer_json = initial_answer
 
-    except Exception as e:
-        print(f"Ошибка генерации изображения: {str(e)}")
+        try:
+            answer_json = ast.literal_eval(answer_json)
+            print(answer_json)
+            bot_response = {"text": initial_answer, "image": None}
+            gc_asks_for_clarification = False
+        except:
+            gc_asks_for_clarification = True
+
+        if gc_asks_for_clarification: # we need to handle this: determining if it's readable JSON or just text comment
+
+            # Сохранение в историю
+            session['flag_user_msg_is_clarification'] = True
+            
+        else:
+
+            initial_answer = get_ans_from_gc(conversation, message_type='clarification', query_dict={"user_prompt":user_message}) # we need to pass both clarification and initial user request here
+            answer_json = initial_answer # CG is supposed to return SQL query + comment
+            answer_json = ast.literal_eval(answer_json)
+            print(answer_json)
+
+            result = safe_query_to_dataframe(answer_json['SQL'])
+
+            if len(result["errors"]) > 0:
+                answer_json = get_ans_from_gc(conversation, message_type = "error", query_dict = {
+                    "sql_query":answer_json['SQL'],
+                    "error":" ".join(result["errors"]),
+                    "database_structure":database_structure,
+                    "user_prompt":user_message,
+                })
+                answer_json = ast.literal_eval(answer_json)
+                result = safe_query_to_dataframe(answer_json['SQL'])
+
+            df = result['data']
+            
+            # Инициализация ответа
+            filename = None
+            
+            # Текстовый ответ
+            if 'comment' in answer_json:
+                bot_response['text'] = answer_json['comment']
+            
+            # Генерация изображения
+            try:
+                timestamp = int(time.time())
+                filename = f"{session['user_id']}_{timestamp}.png"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                df_new, fig = AutoVisualizer(df, file_path).visualize()
+                
+                if fig:
+                    bot_response['image'] = filename
+                else:
+                    if df.shape == (1, 1):
+                        print(df_new.values[0])
+                        bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
+                    else:
+                        bot_response['text'] += f"\nОтвет: {df_new}"
+
+            except Exception as e:
+                print(f"Ошибка генерации изображения: {str(e)}")
     
     # Сохранение в историю
     history_entry = {
