@@ -12,8 +12,9 @@ class MemorySetter():
         giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
 
         giga = GigaChat(credentials=giga_key,
-                        model="GigaChat", 
+                        model="GigaChat-Max", 
                         timeout=30, 
+                        temperature=0.1,
                         verify_ssl_certs=False)
         giga.verbose = False
 

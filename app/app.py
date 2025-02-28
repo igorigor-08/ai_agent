@@ -15,7 +15,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferWindowMemory
 
 app = Flask(__name__)
-app.secret_key = 'aйфвцd'
+app.secret_key = 'AOSDFOOAFS'
 
 memory_setter = MemorySetter()
 
@@ -31,17 +31,19 @@ def index():
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
-    def execute_query(answer_json, conversation, bot_response, session):
+    
+    def execute_query(answer_json, conversation, bot_response, session, user_message):
         result = safe_query_to_dataframe(answer_json['SQL'])
+        print(len(result["errors"]))
         if len(result["errors"]) > 0:
             answer_json = get_ans_from_gc(conversation, message_type = "error", query_dict = {
                 "sql_query":answer_json['SQL'],
                 "error":" ".join(result["errors"]),
-                "database_structure":database_structure,
                 "user_prompt":user_message,
             })
             answer_json = ast.literal_eval(answer_json)
             result = safe_query_to_dataframe(answer_json['SQL'])
+            print(result)
 
         df = result['data']
         filename = None
@@ -80,12 +82,10 @@ def send_message():
     user_message = request.form['message']
     bot_response = {"text": None, "image": None, "table": None}
 
-    with open('../db_structure.txt') as f:
-        database_structure = f.read()
-
     conversation = memory_setter.get_memory_for_user(session['user_id'])
 
     if session['flag_user_msg_is_clarification']:
+        print("We here")
 
         initial_answer = get_ans_from_gc(conversation,
                                          message_type='clarification',
@@ -94,8 +94,7 @@ def send_message():
                                                      "gc_first_response" : session['chat_history'][-1]["bot"]["text"]})
         answer_json = initial_answer # CG is supposed to return SQL query + comment here
         answer_json = ast.literal_eval(answer_json)
-        print(answer_json)
-        bot_response = execute_query(answer_json, conversation, bot_response, session)
+        bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         session['flag_user_msg_is_clarification'] = False
 
     else: # user message is query, not clarification
@@ -104,22 +103,12 @@ def send_message():
         answer_json = initial_answer
 
         try:
+            bot_response = {"text": initial_answer, "image": None, "table":None}
             answer_json = ast.literal_eval(answer_json)
             print(answer_json)
-            bot_response = {"text": initial_answer, "image": None, "table":None}
-            gc_asks_for_clarification = False
+            bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         except:
-            bot_response = {"text": initial_answer, "image": None, "table":None}
-            gc_asks_for_clarification = True
-
-        if gc_asks_for_clarification: # we need to handle this: determining if it's readable JSON or just text comment
-
-            # Сохранение в историю
             session['flag_user_msg_is_clarification'] = True
-            
-        else:
-
-            bot_response = execute_query(answer_json, conversation, bot_response, session)
     
     # Сохранение в историю
     history_entry = {
