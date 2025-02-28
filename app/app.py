@@ -46,6 +46,7 @@ def send_message():
             print(result)
 
         df = result['data']
+        df = df[[i for i in df.columns if not i.endswith("ID")]]
         filename = None
         if 'comment' in answer_json:
             bot_response['text'] = answer_json['comment']
