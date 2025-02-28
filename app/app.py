@@ -5,8 +5,8 @@ import ast
 import uuid
 import time
 from database_utils import safe_query_to_dataframe
-from plot_table import AutoVisualizer
-from gc_utils import get_ans_from_gc
+from plot_table import AutoVisualizer, dataframe_to_html_table
+from gc_utils import get_ans_from_gc, MemorySetter
 from langchain.schema import HumanMessage
 from langchain.chat_models.gigachat import GigaChat
 import requests
@@ -15,18 +15,20 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferWindowMemory
 
 app = Flask(__name__)
-app.secret_key = 'afd'
+app.secret_key = 'aйфвцd'
 
-giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
+memory_setter = MemorySetter()
 
-giga = GigaChat(credentials=giga_key,
-                model="GigaChat", 
-                timeout=30, 
-                verify_ssl_certs=False)
-giga.verbose = False
+# giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
 
-memory = ConversationBufferWindowMemory(k=100)
-conversation = ConversationChain(llm=giga, memory=memory)
+# giga = GigaChat(credentials=giga_key,
+#                 model="GigaChat", 
+#                 timeout=30, 
+#                 verify_ssl_certs=False)
+# giga.verbose = False
+
+# memory = ConversationBufferWindowMemory(k=100)
+# conversation = ConversationChain(llm=giga, memory=memory)
 
 UPLOAD_FOLDER = 'static/images'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
@@ -42,6 +44,7 @@ def send_message():
 
     if 'user_id' not in session:
         session['user_id'] = str(uuid.uuid4())
+        memory_setter.set_memory_for_user(session['user_id'])
 
     user_message = request.form['message']
     bot_response = {"text": None, "image": None}
@@ -50,6 +53,15 @@ def send_message():
         database_structure = f.read()
 
     # Логика формирования ответа
+    
+    conversation = memory_setter.get_memory_for_user(session['user_id'])
+
+    answer_json = get_ans_from_gc(conversation, message_type = "query", query_dict = {
+            "user_prompt":user_message,
+            "database_structure":database_structure
+        })
+    print(answer_json)
+    answer_json = ast.literal_eval(answer_json)
 
     if session['flag_user_msg_is_clarification']:
 
@@ -122,17 +134,23 @@ def send_message():
                         print(df_new.values[0])
                         bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
                     else:
-                        bot_response['text'] += f"\nОтвет: {df_new}"
+                        ans = dataframe_to_html_table(df_new)
+                        bot_response['table'] = ans
 
             except Exception as e:
-                print(f"Ошибка генерации изображения: {str(e)}")
+                try:
+                    ans = dataframe_to_html_table(df_new)
+                    bot_response['table'] = ans
+                except:
+                    print(f"Ошибка генерации изображения: {str(e)}")
     
     # Сохранение в историю
     history_entry = {
         'user': user_message,
         'bot': {
             'text': bot_response['text'],
-            'image': bot_response['image']
+            'image': bot_response['image'],
+            'table': bot_response['table'],
         }
     }
     

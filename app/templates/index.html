@@ -5,6 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Диалог с ботом</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <style>
+        /* Добавляем стили для таблиц */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            background: white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .table-container {
+            max-width: 100%;
+            overflow-x: auto;
+            margin: 1rem 0;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="chat-container">
@@ -20,6 +60,11 @@
                             <div class="bot-response">
                                 {% if message.bot.text %}
                                     <p>{{ message.bot.text }}</p>
+                                {% endif %}
+                                {% if message.bot.table %}
+                                    <div class="table-container">
+                                        {{ message.bot.table|safe }}
+                                    </div>
                                 {% endif %}
                                 {% if message.bot.image %}
                                     <img src="{{ url_for('uploaded_file', filename=message.bot.image) }}" 
@@ -69,6 +114,7 @@
                 addMessage({
                     isBot: true,
                     text: data.bot_response.text,
+                    table: data.bot_response.table,
                     image: data.bot_response.image
                 });
                 
@@ -77,7 +123,7 @@
             });
         });
         
-        function addMessage({isBot, text, image}) {
+        function addMessage({isBot, text, table, image}) {
             const chatBox = document.getElementById('chat-box');
             
             // Создаем основной контейнер сообщения
@@ -99,7 +145,14 @@
                 textPara.textContent = text;
                 contentDiv.appendChild(textPara);
             }
-            
+
+            if (table) {
+                const tableContainer = document.createElement('div');
+                tableContainer.className = 'table-container';
+                tableContainer.innerHTML = table;
+                contentDiv.appendChild(tableContainer);
+            }
+
             // Добавляем изображение если есть
             if (image) {
                 const img = document.createElement('img');

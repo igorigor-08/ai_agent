@@ -1,6 +1,28 @@
 from langchain.schema import HumanMessage
 from langchain.chat_models.gigachat import GigaChat
 import requests
+from langchain.chains import ConversationChain
+from langchain.memory import ConversationBufferWindowMemory
+
+class MemorySetter():
+    def __init__(self):
+        self.memory_chain = {}
+
+    def set_memory_for_user(self, id):
+        giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
+
+        giga = GigaChat(credentials=giga_key,
+                        model="GigaChat", 
+                        timeout=30, 
+                        verify_ssl_certs=False)
+        giga.verbose = False
+
+        memory = ConversationBufferWindowMemory(k=100)
+        conversation = ConversationChain(llm=giga, memory=memory)
+        self.memory_chain[id] = conversation
+
+    def get_memory_for_user(self, id):
+        return self.memory_chain[id]
 
 def get_ans_from_gc(conversation, message_type = "query", query_dict = {}):
 
@@ -17,6 +39,7 @@ def get_ans_from_gc(conversation, message_type = "query", query_dict = {}):
         classic_prompt = extended_prompt.replace('{user_prompt}', query_dict.get("user_prompt", ""))
         classic_prompt = classic_prompt.replace('{plug_if_initial_query}', asking_for_clarification)
 
+        classic_prompt = classic_prompt.replace('{database_structure}', query_dict.get("database_structure", ""))
     elif message_type == 'error':
         with open(query_evaluator_prompt_file) as f:
             extended_prompt = f.read()

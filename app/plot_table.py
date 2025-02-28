@@ -223,3 +223,26 @@ class AutoVisualizer:
                 plt.show()
         plt.savefig(self.filepath)
         return self.df, True
+
+
+def dataframe_to_html_table(df, **kwargs):
+
+    default_options = {
+        'index': False,
+        'escape': True,
+        'border': 1,
+        'classes': ['table', 'table-striped', 'table-hover'],
+        'na_rep': 'N/A'
+    }
+    
+    options = {**default_options, **kwargs}
+    
+    html = df.to_html(**options)
+    
+    styled_html = f"""
+    <div style="overflow-x: auto;">
+        {html}
+    </div>
+    """
+    
+    return styled_html
