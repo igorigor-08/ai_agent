@@ -9,10 +9,10 @@ class MemorySetter():
         self.memory_chain = {}
 
     def set_memory_for_user(self, id):
-        giga_key = 'Mzc5NGQ0ODEtNjVmYi00NTM3LWI2MDQtYTIzNjY0YWI2MWU4OjJmNDA5MDIxLTcxMTgtNGQ1OC04N2E0LTM3YzlkMWU1MjI1OA=='
+        giga_key = 'MzU1OTZiYmUtNzEzNy00MDVmLWI4ZmUtZGQ5MGM1YzVhYThkOjJlMDY2ODEyLTI5ZTgtNGM5Zi1iMzMyLTMwZjFmMmQ0NjY0NQ=='
 
         giga = GigaChat(credentials=giga_key,
-                        model="GigaChat-Max", 
+                        model="GigaChat", 
                         timeout=30, 
                         temperature=0.1,
                         verify_ssl_certs=False)

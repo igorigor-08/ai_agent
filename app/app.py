@@ -41,8 +41,12 @@ def send_message():
                 "error":" ".join(result["errors"]),
                 "user_prompt":user_message,
             })
-            answer_json = ast.literal_eval(answer_json)
-            result = safe_query_to_dataframe(answer_json['SQL'])
+            try:
+                answer_json = ast.literal_eval(answer_json)
+                sql_query = answer_json['SQL']
+            except SyntaxError:
+                sql_query = answer_json[answer_json.find("SELECT"):answer_json.rfind(";")]
+            result = safe_query_to_dataframe(sql_query)
             print(result)
 
         df = result['data']
@@ -72,6 +76,7 @@ def send_message():
                 ans = dataframe_to_html_table(df_new)
                 bot_response['table'] = ans
             except:
+                bot_response['text'] = "Что-то пошло не так, попробуйте еще раз"
                 print(f"Ошибка генерации изображения: {str(e)}")
 
         return bot_response
@@ -94,9 +99,12 @@ def send_message():
                                                      "user_prompt" : session['chat_history'][-1]["user"],
                                                      "gc_first_response" : session['chat_history'][-1]["bot"]["text"]})
         answer_json = initial_answer # CG is supposed to return SQL query + comment here
-        answer_json = ast.literal_eval(answer_json)
-        bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
-        session['flag_user_msg_is_clarification'] = False
+        try:
+            session['flag_user_msg_is_clarification'] = False
+            answer_json = ast.literal_eval(answer_json)
+            bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
+        except:
+            bot_response['text'] = "Что-то пошло не так, попробуйте еще раз"
 
     else: # user message is query, not clarification
         
@@ -108,7 +116,7 @@ def send_message():
             answer_json = ast.literal_eval(answer_json)
             print(answer_json)
             bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
-        except:
+        except SyntaxError:
             session['flag_user_msg_is_clarification'] = True
     
     # Сохранение в историю
