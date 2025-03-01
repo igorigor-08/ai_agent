@@ -88,7 +88,8 @@ def send_message():
     try:
         conversation = memory_setter.get_memory_for_user(session['user_id'])
     except:
-        conversation = memory_setter.set_memory_for_user(session['user_id'])
+        memory_setter.set_memory_for_user(session['user_id'])
+        conversation = memory_setter.get_memory_for_user(session['user_id'])
 
     if session['flag_user_msg_is_clarification']:
 
@@ -130,8 +131,10 @@ def send_message():
     if 'chat_history' not in session:
         session['chat_history'] = []
     
-    if bot_response['text'].startswith('Я не могу'):
-        conversation = memory_setter.set_memory_for_user(session['user_id'])
+    if bot_response['text'].find('я не могу')!=-1:
+        memory_setter.set_memory_for_user(session['user_id'])
+        conversation = memory_setter.get_memory_for_user(session['user_id'])
+        session['flag_user_msg_is_clarification'] = False
     session['chat_history'].append(history_entry)
     session.modified = True
     
