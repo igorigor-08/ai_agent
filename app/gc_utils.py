@@ -72,4 +72,3 @@ def get_ans_from_gc(conversation, message_type = "query", query_dict = {}):
     response = conversation.run(classic_prompt)
     print(response)
     return response
-    # print(f"Model answer:\n{response.content}\n")

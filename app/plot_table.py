@@ -59,7 +59,6 @@ class AutoVisualizer:
         """
         column_types = {}
         for col in self.df.columns:
-            print(self.df[col])
             if self._is_year_column(self.df[col]):
                 column_types[col] = "year"
             elif self._is_datetime_column(self.df[col]):
@@ -131,19 +130,15 @@ class AutoVisualizer:
         datetime_cols = [col for col, type_ in self.column_types.items() if type_ == "datetime"]
 
         if self.df.shape[0] == 0:
-            print('Empty dataframe')
             return None, None
         elif self.df.shape == (1, 1):
-            print('Single value')
             return self.df, None
         elif len(numeric_cols) == 0:
-            print('No numeric columns')
             return self.df, None
 
         
         # Set a consistent color palette
         sns.set_palette("husl")        
-        print(self.column_types)
         if self.agg_needed:
             # Box plot 
             fig, ax = plt.subplots(figsize=(10, 6), dpi=100)

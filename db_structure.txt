@@ -1,60 +1,60 @@
 # База данных кредитного портфеля
 Таблицы и столбцы:
 
-Таблица: IndividualBorrowers
-IndividualID (SERIAL): Уникальный идентификатор физического заемщика.
-DateOfBirth (DATE): Дата рождения заемщика.
+Таблица: individual_borrowers
+individual_id (SERIAL): Уникальный идентификатор физического заемщика.
+date_of_birth (DATE): Дата рождения заемщика.
 
-Таблица: CompanyBorrowers
-CompanyID (SERIAL): Уникальный идентификатор компании-заемщика.
-CompanyName (VARCHAR(100)): Название компании (обязательное поле).
-BusinessSector (ENUM): Сектор бизнеса (Technology, Financial Services, Retail, Energy and Utilities, Industrial and Manufacturing, Real Estate).
+Таблица: company_borrowers
+company_id (SERIAL): Уникальный идентификатор компании-заемщика.
+company_name (VARCHAR(100)): Название компании (обязательное поле).
+business_sector (ENUM): Сектор бизнеса ('Информационные технологии', 'Финансовые организации', 'Коммерция', 'Энергетика', 'Производство', 'Недвижимость').
 
-Таблица: CreditProducts
-ProductID (SERIAL): Уникальный идентификатор кредитного продукта.
-ProductName (ENUM): Тип продукта (Personal Loan, Mortgage, Auto Loan, Credit Card, Business Loan, Revolving Credit Line, Warranty).
-InterestRate (NUMERIC(5,2)): Процентная ставка (например, 5.25%).
-MinLoanAmount (NUMERIC(15,2)): Минимальная сумма займа.
-MaxLoanAmount (NUMERIC(15,2)): Максимальная сумма займа.
-TermMonths (INTEGER): Срок займа в месяцах.
+Таблица: credit_products
+product_id (SERIAL): Уникальный идентификатор кредитного продукта.
+product_name (ENUM): Тип продукта ('Потребительский кредит', 'Ипотека', 'Автокредит', 'Кредитная карта', 'Бизнес-кредит', 'Возобновляемая кредитная линия', 'Гарантия').
+interest_rate (NUMERIC(5,2)): Процентная ставка (например, 5.25%).
+min_loan_amount (NUMERIC(15,2)): Минимальная сумма займа.
+max_loan_amount (NUMERIC(15,2)): Максимальная сумма займа.
+term_months (INTEGER): Срок займа в месяцах.
 
-Таблица: Credits
-CreditID (SERIAL): Уникальный идентификатор кредита.
-IndividualID (INTEGER): Ссылка на физического заемщика (может быть NULL, если кредит выдан компании).
-CompanyID (INTEGER): Ссылка на компанию-заемщика (может быть NULL, если кредит выдан физическому лицу).
-ProductID (INTEGER): Ссылка на кредитный продукт (обязательное поле).
-LoanAmount (NUMERIC(15,2)): Сумма кредита.
-InterestRate (NUMERIC(5,2)): Процентная ставка по кредиту.
-StartDate (DATE): Дата начала кредита.
-EndDate (DATE): Планируемая дата погашения (может быть NULL для бессрочных кредитов).
-Status (ENUM): Статус кредита (Active, Closed, Defaulted). Значение по умолчанию — Active.
+Таблица: credits
+credit_id (SERIAL): Уникальный идентификатор кредита.
+individual_id (INTEGER): Ссылка на физического заемщика (может быть NULL, если кредит выдан компании).
+company_id (INTEGER): Ссылка на компанию-заемщика (может быть NULL, если кредит выдан физическому лицу).
+product_id (INTEGER): Ссылка на кредитный продукт (обязательное поле).
+loan_amount (NUMERIC(15,2)): Сумма кредита.
+interest_rate (NUMERIC(5,2)): Процентная ставка по кредиту.
+start_date (DATE): Дата начала кредита.
+end_date (DATE): Планируемая дата погашения (может быть NULL для бессрочных кредитов).
+status (ENUM): Статус кредита ('Активный', 'Закрытый', 'Дефолт'). Значение по умолчанию — Активный.
 
-Таблица: ClientTransactions
-TransactionID (SERIAL): Уникальный идентификатор транзакции.
-CreditID (INTEGER): Ссылка на кредит.
-TransactionType (ENUM): Тип транзакции (Principal repayment — погашение основного долга, Repayment of overdue debt — погашение просрочки, Penalty repayment — погашение штрафа).
-Amount (NUMERIC(15,2)): Сумма транзакции.
-TransactionDate (TIMESTAMP): Дата и время транзакции.
+Таблица: client_transactions
+transaction_id (SERIAL): Уникальный идентификатор транзакции.
+credit_id (INTEGER): Ссылка на кредит.
+transaction_type (ENUM): Тип транзакции ('Выплата основного долга', 'Выплата просроченного долга', 'Выплата штрафов').
+amount (NUMERIC(15,2)): Сумма транзакции.
+transaction_date (TIMESTAMP): Дата и время транзакции.
 
-Таблица: RiskRatings
-RatingID (SERIAL): Уникальный идентификатор оценки риска.
-IndividualID (INTEGER): Ссылка на физического заемщика (может быть NULL, если оценка для компании).
-CompanyID (INTEGER): Ссылка на компанию-заемщика (может быть NULL, если оценка для физического лица).
-CreditID (INTEGER): Ссылка на кредит (обязательное поле).
-Rating (INTEGER): Оценка риска (1 — минимальный риск, 26 — максимальный риск).
-ProbabilityOfDefault (NUMERIC(5,4)): Вероятность дефолта (от 0.0000 до 1.0000).
-RatingDate (DATE): Дата оценки.
+Таблица: risk_ratings
+rating_id (SERIAL): Уникальный идентификатор оценки риска.
+individual_id (INTEGER): Ссылка на физического заемщика (может быть NULL, если оценка для компании).
+company_id (INTEGER): Ссылка на компанию-заемщика (может быть NULL, если оценка для физического лица).
+credit_id (INTEGER): Ссылка на кредит (обязательное поле).
+rating (INTEGER): Оценка риска (1 — минимальный риск, 26 — максимальный риск).
+probability_of_default (NUMERIC(5,4)): Вероятность дефолта (от 0.0000 до 1.0000).
+rating_date (DATE): Дата оценки.
 
-Таблица: Defaults
-DefaultID (SERIAL): Уникальный идентификатор дефолта.
-CreditID (INTEGER): Ссылка на кредит.
-DefaultDate (DATE): Дата наступления дефолта.
-DefaultAmount (NUMERIC(15,2)): Непогашенная сумма на момент дефолта.
-RecoveryAmount (NUMERIC(15,2)): Сумма, восстановленная после дефолта (например, за счет взыскания).
-ReasonForDefault (ENUM): Причина дефолта (Overdue — просрочка, Bankruptcy — банкротство, Restructuring — реструктуризация, Liquidation — ликвидация, Cession — цессия).
+Таблица: defaults
+default_id (SERIAL): Уникальный идентификатор дефолта.
+credit_id (INTEGER): Ссылка на кредит.
+default_date (DATE): Дата наступления дефолта.
+default_amount (NUMERIC(15,2)): Непогашенная сумма на момент дефолта.
+recovery_amount (NUMERIC(15,2)): Сумма, восстановленная после дефолта (например, за счет взыскания).
+reason_for_default (ENUM): Причина дефолта ('Просрочка', 'Банкротство', 'Реструктуризация', 'Ликвидация', 'Цессия').
 
-Таблица: CreditReserves
-ReserveID (SERIAL): Уникальный идентификатор резерва.
-CreditID (INTEGER): Ссылка на кредит.
-ReserveStage (ENUM): Этап резервирования (Stage 1 — стандартный риск, Stage 2 — повышенный риск, Stage 3 — критический риск).
-ReserveAmount (NUMERIC(15,2)): Зарезервированная сумма для покрытия потенциальных убытков.
+Таблица: credit_reserves
+reserve_id (SERIAL): Уникальный идентификатор резерва.
+credit_id (INTEGER): Ссылка на кредит.
+reserve_stage (ENUM): Этап резервирования (Стадия 1 — стандартный риск, Стадия 2 — повышенный риск, Стадия 3 — критический риск).
+reserve_amount (NUMERIC(15,2)): Зарезервированная сумма для покрытия потенциальных убытков.

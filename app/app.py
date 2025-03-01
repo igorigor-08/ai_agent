@@ -15,7 +15,7 @@ from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferWindowMemory
 
 app = Flask(__name__)
-app.secret_key = 'AOSDFOOAFS'
+app.secret_key = 'asdasfavasd'
 
 memory_setter = MemorySetter()
 
@@ -34,7 +34,6 @@ def send_message():
     
     def execute_query(answer_json, conversation, bot_response, session, user_message):
         result = safe_query_to_dataframe(answer_json['SQL'])
-        print(len(result["errors"]))
         if len(result["errors"]) > 0:
             answer_json = get_ans_from_gc(conversation, message_type = "error", query_dict = {
                 "sql_query":answer_json['SQL'],
@@ -65,10 +64,9 @@ def send_message():
                 bot_response['image'] = filename
             else:
                 if df.shape == (1, 1):
-                    print(df_new.values[0])
                     bot_response['text'] += f"\nОтвет: {round(df_new.values[0][0], 3)}"
                 else:
-                    ans = dataframe_to_html_table(df_new)
+                    ans = dataframe_to_html_table(df_new.drop_duplicates())
                     bot_response['table'] = ans
 
         except Exception as e:
@@ -87,11 +85,12 @@ def send_message():
 
     user_message = request.form['message']
     bot_response = {"text": None, "image": None, "table": None}
-
-    conversation = memory_setter.get_memory_for_user(session['user_id'])
+    try:
+        conversation = memory_setter.get_memory_for_user(session['user_id'])
+    except:
+        conversation = memory_setter.set_memory_for_user(session['user_id'])
 
     if session['flag_user_msg_is_clarification']:
-        print("We here")
 
         initial_answer = get_ans_from_gc(conversation,
                                          message_type='clarification',
@@ -114,7 +113,6 @@ def send_message():
         try:
             bot_response = {"text": initial_answer, "image": None, "table":None}
             answer_json = ast.literal_eval(answer_json)
-            print(answer_json)
             bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         except SyntaxError:
             session['flag_user_msg_is_clarification'] = True
@@ -132,6 +130,8 @@ def send_message():
     if 'chat_history' not in session:
         session['chat_history'] = []
     
+    if bot_response['text'].startswith('Я не могу'):
+        conversation = memory_setter.set_memory_for_user(session['user_id'])
     session['chat_history'].append(history_entry)
     session.modified = True
     
