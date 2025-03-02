@@ -74,7 +74,7 @@ def send_message():
                 ans = dataframe_to_html_table(df_new)
                 bot_response['table'] = ans
             except:
-                bot_response['text'] = "Что-то пошло не так, попробуйте еще раз"
+                bot_response['text'] = "Попробуйте еще раз задать вопрос"
                 print(f"Ошибка генерации изображения: {str(e)}")
 
         return bot_response
@@ -104,7 +104,7 @@ def send_message():
             answer_json = ast.literal_eval(answer_json.replace('```json', '').replace('```', ''))
             bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         except:
-            bot_response['text'] = "Что-то пошло не так, попробуйте еще раз"
+            bot_response['text'] = "Попробуйте еще раз задать вопрос"
 
     else: # user message is query, not clarification
         

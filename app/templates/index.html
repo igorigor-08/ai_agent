@@ -51,6 +51,16 @@
         <h1>Диалог с ботом</h1>
         <div id="chat-box">
             {% for message in chat_history %}
+                <div class="chat-message user-message">
+                    <div class="avatar user-avatar">
+                        👤
+                    </div>
+                    <div class="message-content">
+                        <div class="user-request">
+                            <p>{{ message.user }}</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="chat-message {% if message.bot %}bot-message{% else %}user-message{% endif %}">
                     <div class="avatar {% if message.bot %}bot-avatar{% else %}user-avatar{% endif %}">
                         {% if message.bot %}🤖{% else %}👤{% endif %}
@@ -71,8 +81,6 @@
                                          alt="Визуализация данных">
                                 {% endif %}
                             </div>
-                        {% else %}
-                            <p>{{ message.user }}</p>
                         {% endif %}
                     </div>
                 </div>
