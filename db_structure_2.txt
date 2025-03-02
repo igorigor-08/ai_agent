@@ -1,0 +1,41 @@
+Схема базы данных:
+individual_borrowers: individual_id (PK), date_of_birth
+company_borrowers: company_id (PK), company_name, business_sector
+credit_products: product_id (PK), product_name, interest_rate, min_loan_amount, max_loan_amount, term_months
+credits: credit_id (PK), individual_id (FK), company_id (FK), product_id (FK), loan_amount, interest_rate, start_date, end_date, status
+client_transactions: transaction_id (PK), credit_id (FK), transaction_type, amount, transaction_date
+risk_ratings: rating_id (PK), individual_id (FK), company_id (FK), credit_id (FK), rating, probability_of_default, rating_date
+defaults: default_id (PK), credit_id (FK), default_date, default_amount, recovery_amount, reason_for_default
+credit_reserves: reserve_id (PK), credit_id (FK), reserve_stage, reserve_amount
+
+Физические лица, физлица, ФЛ (Individual borrower) → individual_borrowers
+Юридические лица, корпоративные клиенты, ЮЛ (Company borrower, corporate borrower) → company_borrowers
+Заемщики (Borrower) → individual_borrowers or company_borrowers
+Кредиты (Credit) → credits
+Транзакции, платежи (Transaction) → client_transactions
+Рейтинги, риск рейтинги (Rating, risk rating) → risk_ratings
+Дефолты (Default) → defaults
+Потребительский кредит (Consumer Loan) → 'Потребительский кредит' (product_name)
+Ипотека (Mortgage) → 'Ипотека' (product_name)
+Автокредит (Auto Loan) → 'Автокредит' (product_name)
+Кредитная карта, КК (Credit Card) → 'Кредитная карта' (product_name)
+Бизнес-кредит (Business Loan) → 'Бизнес-кредит' (product_name)
+Возобновляемая кредитная линия, ВКЛ (Revolving Credit Line) → 'Возобновляемая кредитная линия' (product_name)
+Гарантия (Warranty) → 'Гарантия' (product_name)
+Дата рождения (Date of Birth) → date_of_birth
+Сектор бизнеса, отрасль (Business Sector) → business_sector
+Сумма кредита, лимит (Loan Amount) → loan_amount
+Процентная ставка (Interest Rate) → interest_rate
+Дата начала (Start Date) → start_date
+Дата окончания (End Date) → end_date
+Статус (Status) → status
+Тип транзакции, тип платежа (Transaction Type) → transaction_type
+Сумма транзакции, сумма платежа (Transaction Amount) → amount
+Дата транзакции (Transaction Date) → transaction_date
+Рейтинг, риск-рейтинг (Rating) → rating
+Вероятность дефолта (Probability of Default, PD) → probability_of_default
+Причина дефолта (Reason for Default) → reason_for_default
+Сумма дефолта (Default Amount) → default_amount
+Сумма восстановления (Recovery Amount) → recovery_amount
+Стадия резервирования (Reserve Stage) → reserve_stage
+Сумма резерва, сумма резервирования (Reserve Amount) → reserve_amount

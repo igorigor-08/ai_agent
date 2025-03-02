@@ -41,7 +41,7 @@ def send_message():
                 "user_prompt":user_message,
             })
             try:
-                answer_json = ast.literal_eval(answer_json)
+                answer_json = ast.literal_eval(answer_json.replace('```json', '').replace('```', ''))
                 sql_query = answer_json['SQL']
             except SyntaxError:
                 sql_query = answer_json[answer_json.find("SELECT"):answer_json.rfind(";")]
@@ -49,7 +49,7 @@ def send_message():
             print(result)
 
         df = result['data']
-        df = df[[i for i in df.columns if not i.endswith("ID")]]
+        df = df[[i for i in df.columns if not i.endswith("_id")]]
         filename = None
         if 'comment' in answer_json:
             bot_response['text'] = answer_json['comment']
@@ -101,7 +101,7 @@ def send_message():
         answer_json = initial_answer # CG is supposed to return SQL query + comment here
         try:
             session['flag_user_msg_is_clarification'] = False
-            answer_json = ast.literal_eval(answer_json)
+            answer_json = ast.literal_eval(answer_json.replace('```json', '').replace('```', ''))
             bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         except:
             bot_response['text'] = "Что-то пошло не так, попробуйте еще раз"
@@ -113,7 +113,7 @@ def send_message():
 
         try:
             bot_response = {"text": initial_answer, "image": None, "table":None}
-            answer_json = ast.literal_eval(answer_json)
+            answer_json = ast.literal_eval(answer_json.replace('```json', '').replace('```', ''))
             bot_response = execute_query(answer_json, conversation, bot_response, session, user_message)
         except SyntaxError:
             session['flag_user_msg_is_clarification'] = True
